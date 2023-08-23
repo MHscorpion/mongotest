@@ -9,56 +9,57 @@ const RoomInfoSchema = new Schema({
   },
   gameStep: {
     type: Number,
-    default:0,
+    default: 0,
   },
   dealerButton: {
     type: Number,
-    default:0,
+    default: 0,
   },
   actionPlayer: {
     type: Number,
-    default:0,
+    default: 0,
   },
   requestResponse: {
     type: Boolean,
-    default:false,
+    default: false,
   },
-  player: { 
+  player: {
     type: [String],
-    default:["NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE"],
+    default: ["NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE"],
+    index: true,
   },
   bettingOrder: {
     type: [Number],
-    default:[0, 1, 2, 3, 4, 5, 6],
+    default: [0, 1, 2, 3, 4, 5, 6],
   },
   // 0 noaction 
   // 1 wait player response
   // 2 complete player response 
   playerStatus: {
     type: [Number],
-    default:[0, 0, 0, 0, 0, 0, 0],
+    default: [0, 0, 0, 0, 0, 0, 0],
   },
   playerRefresh: {
     type: [Number],
-    default:[0, 0, 0, 0, 0, 0, 0],
+    default: [0, 0, 0, 0, 0, 0, 0],
   },
   playerAction: {
     type: [Number],
-    default:[0, 0, 0, 0, 0, 0, 0],
+    default: [0, 0, 0, 0, 0, 0, 0],
   },
   playerBettingMoney: {
     type: [Number],
-    default:[0, 0, 0, 0, 0, 0, 0],
+    default: [0, 0, 0, 0, 0, 0, 0],
   },
   playerMoney: {
     type: [Number],
-    default:[0, 0, 0, 0, 0, 0, 0],
+    default: [0, 0, 0, 0, 0, 0, 0],
   },
   playerCard: {
     type: [String],
-    default:["", "", "", "", "", "", ""],
+    default: ["", "", "", "", "", "", ""],
   },
- 
+
   //deck에 깔린 카드
   deckCards: {
     required: true,

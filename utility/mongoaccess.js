@@ -13,7 +13,7 @@ module.exports = class MongoAccess {
   createRoom(roomid) {
     let roomInfo = new RoomInfo();
     roomInfo.room_id = roomid;
-    
+
     let retValue = 0;
     RoomInfo.insertMany(roomInfo)
       .then((resData) => {
@@ -46,23 +46,61 @@ module.exports = class MongoAccess {
     return retValue;
   }
 
-  setDataInArray( roomid,arrayName,nindex,setValue) {
+  playerSet(roomid, nindex, setValue) {
     let retCode = 0;
-    let arrayStr = arrayName+'.'+nindex;
-    let player5Str = 'player.5';
-    RoomInfo.updateOne({ room_id: roomid}, { $set: { player5Str: setValue } })
-    .then((resData) => {
-      console.log(resData);
-     
-      retCode=1;
-    
-    }).catch((err) => {
-      console.log(err);
-      retCode=0;
-    })    
-     
+    console.log(nindex);
 
-    return retCode ;
+    if (nindex == -1) {
+      // 지정 배열 전체 값  변경 
+      RoomInfo.updateOne(
+        { room_id: roomid },
+        { $set: { "player.$[]": setValue } },
+        { upsert: true }
+
+      ).then((resData) => {
+        console.log('player all data change success');
+        console.log(resData);
+        retCode = 0;
+      }
+      )
+    } else {
+      console.log('change nindex data');
+
+      let updateStr = {};
+      if (nindex == 0) updateStr = { $set: { 'player.0': setValue } };
+      if (nindex == 1) updateStr = { $set: { 'player.1': setValue } };
+      if (nindex == 2) updateStr = { $set: { 'player.2': setValue } };
+      if (nindex == 3) updateStr = { $set: { 'player.3': setValue } };
+      if (nindex == 4) updateStr = { $set: { 'player.4': setValue } };
+      if (nindex == 5) updateStr = { $set: { 'player.5': setValue } };
+      if (nindex == 6) updateStr = { $set: { 'player.6': setValue } };
+      // 지정 어레이 인덱스의 요소값 변경
+      RoomInfo.updateOne(
+        { room_id: roomid },
+        updateStr
+
+      ).then((resData) => {
+        console.log('player element change success');
+        console.log(resData);
+        retCode = 0;
+      }
+      )
+    }
+
+    /*
+        // 지정 어레이 인덱스의 요소값 변경 
+        RoomInfo.findOneAndUpdate(
+          { room_id: roomid },
+          { $set: { "player.$[element]": setValue } },
+          { arrayFilters: [{ element: nindex }], upsert: true }
+        ).then((resData) => {
+          console.log('join room success');
+          console.log(resData);
+          retCode = 0;
+        }
+        )
+    */
+    return retCode;
   }
 
   joinRoom(roomid, playerid) {
@@ -80,18 +118,18 @@ module.exports = class MongoAccess {
       retCode=0;
     })    
 */
-/*
-RoomInfo.updateOne({ room_id: roomid, 'player.2':'NONE' }, { $set: { "player.2": "test" } })
-.then((resData) => {
-  console.log(resData);
- 
-  retCode=1;
-
-}).catch((err) => {
-  console.log(err);
-  retCode=0;
-})    
-*/
+    /*
+    RoomInfo.updateOne({ room_id: roomid, 'player.2':'NONE' }, { $set: { "player.2": "test" } })
+    .then((resData) => {
+      console.log(resData);
+     
+      retCode=1;
+    
+    }).catch((err) => {
+      console.log(err);
+      retCode=0;
+    })    
+    */
     /*
     RoomInfo.findOneAndUpdate(
       { room_id: roomid},
@@ -132,7 +170,7 @@ RoomInfo.updateOne({ room_id: roomid, 'player.2':'NONE' }, { $set: { "player.2":
       })*/
     return retCode;
   }
-  
+
 } // class 
 
 function createPokerArray() {

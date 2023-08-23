@@ -198,7 +198,7 @@ server.get('/joinroom/:roomid/:userid', (req, res) => {
   //const newUser = new User();
   let params = req.params;
   console.log(params);
-  let retCode = mongoAccess.setDataInArray(params.roomid,'player',4,'set');//joinRoom(params.roomid, params.userid);
+  let retCode = mongoAccess.playerSet(params.roomid, 5, 'playser666');//joinRoom(params.roomid, params.userid);
   if (retCode == 0) {
     res.json({ message: params.roomid + " join success!!" });
   } else {
@@ -232,7 +232,7 @@ server.listen(3000, (err) => {
   } else {
     mongoose.connect("mongodb+srv://androlimo2osys:Must980419@mongocluster.sm5hzzb.mongodb.net/?retryWrites=true&w=majority", {
       dbName: 'mydb', // 실제로 데이터 저장할 db명
-     
+
     });
 
     //createPokerArray();
