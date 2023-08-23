@@ -107,6 +107,7 @@ server.get('/adduser/:name/:passwd/:nick', (req, res) => {
       console.log(user);
       res.json({ message: params.name + ' user create success...' })
     }).catch((err) => {
+      console.log(err);
       res.json({
         message: err
       })
@@ -197,7 +198,7 @@ server.get('/joinroom/:roomid/:userid', (req, res) => {
   //const newUser = new User();
   let params = req.params;
   console.log(params);
-  let retCode = mongoAccess.joinRoom(params.roomid, params.userid);
+  let retCode = mongoAccess.setDataInArray(params.roomid,'player',4,'set');//joinRoom(params.roomid, params.userid);
   if (retCode == 0) {
     res.json({ message: params.roomid + " join success!!" });
   } else {
@@ -229,7 +230,10 @@ server.listen(3000, (err) => {
   if (err) {
     return console.log(err);
   } else {
-    mongoose.connect("mongodb://127.0.0.1:27017/testdb");
+    mongoose.connect("mongodb+srv://androlimo2osys:Must980419@mongocluster.sm5hzzb.mongodb.net/?retryWrites=true&w=majority", {
+      dbName: 'mydb', // 실제로 데이터 저장할 db명
+     
+    });
 
     //createPokerArray();
     const db = mongoose.connection; //mongoose로 연결한 첫번째 연결을 의미합니다. 자세한건 후술

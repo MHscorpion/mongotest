@@ -7,6 +7,10 @@ const DealerCard = new Schema({
     unique: true,
     type: String,
   },
+  popIndex: {
+    type: [Number],
+    default:0,
+  },
   cards: {
     required: true,
     type: [String],

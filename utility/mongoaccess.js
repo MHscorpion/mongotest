@@ -13,17 +13,7 @@ module.exports = class MongoAccess {
   createRoom(roomid) {
     let roomInfo = new RoomInfo();
     roomInfo.room_id = roomid;
-    roomInfo.players = [];
-    roomInfo.playersResponse = [];
-    roomInfo.gameStatus = 0;
-    roomInfo.bettingPlayer = 0;
-    roomInfo.bettingPlayerStatus = 0;
-    roomInfo.deckBettingAmt = 0;
-    roomInfo.prevBettingAmt = 0;
-    roomInfo.dealerButton = 0;
-    roomInfo.cardPopIndex = 0;
-    roomInfo.deckCards = [];
-
+    
     let retValue = 0;
     RoomInfo.insertMany(roomInfo)
       .then((resData) => {
@@ -56,8 +46,66 @@ module.exports = class MongoAccess {
     return retValue;
   }
 
+  setDataInArray( roomid,arrayName,nindex,setValue) {
+    let retCode = 0;
+    let arrayStr = arrayName+'.'+nindex;
+    let player5Str = 'player.5';
+    RoomInfo.updateOne({ room_id: roomid}, { $set: { player5Str: setValue } })
+    .then((resData) => {
+      console.log(resData);
+     
+      retCode=1;
+    
+    }).catch((err) => {
+      console.log(err);
+      retCode=0;
+    })    
+     
+
+    return retCode ;
+  }
+
   joinRoom(roomid, playerid) {
     let retCode = 0;
+    // NONE 인 첫번째 어레이 데이터에 유저 등록
+    /*
+    RoomInfo.updateOne({ room_id: roomid, player: "NONE" }, { $set: { "player.$": playerid } })
+    .then((resData) => {
+      console.log(resData);
+     
+      retCode=1;
+
+    }).catch((err) => {
+      console.log(err);
+      retCode=0;
+    })    
+*/
+/*
+RoomInfo.updateOne({ room_id: roomid, 'player.2':'NONE' }, { $set: { "player.2": "test" } })
+.then((resData) => {
+  console.log(resData);
+ 
+  retCode=1;
+
+}).catch((err) => {
+  console.log(err);
+  retCode=0;
+})    
+*/
+    /*
+    RoomInfo.findOneAndUpdate(
+      { room_id: roomid},
+      { $set: { "player.$[element]":playerid } },
+      { arrayFilters:[{element:"NONE"}]}
+    ).then((resData) => {
+      console.log('join room success');
+      console.log(resData);
+      retCode = 0;
+    }
+    )
+*/
+
+    /*
     Players.find({ user_id: playerid }) // user id exist ?
       .then((user) => {
         console.log("find user:" + user[0].user_id)
@@ -81,9 +129,10 @@ module.exports = class MongoAccess {
         console.log('joinroom error ')
 
         retCode = 2;
-      })
+      })*/
     return retCode;
   }
+  
 } // class 
 
 function createPokerArray() {

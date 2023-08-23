@@ -7,6 +7,7 @@ const dbUrl = 'mongodb://' +
     'localhost' + // host
     ':27017' + // port
     '/admin'; // db : admin db는 로그인을 위한 db 
+const dbUrl2 = 'mongodb+srv://androlimo2osys:Must980419@mongocluster.sm5hzzb.mongodb.net/?retryWrites=true&w=majority'; // db : admin db는 로그인을 위한 db     
 
 // 몽구스 연결 함수
 const connect = () => {
@@ -16,7 +17,7 @@ const connect = () => {
     mongoose.set('debug', true); // 몽고 쿼리가 콘솔에서 뜨게 한다.
   }
 */
-  mongoose.connect(dbUrl, {
+  mongoose.connect(dbUrl2, {
     dbName: 'testdb', // 실제로 데이터 저장할 db명
     useNewUrlParser: true,
     useCreateIndex: true,
