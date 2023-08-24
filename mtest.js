@@ -198,7 +198,7 @@ server.get('/joinroom/:roomid/:userid', (req, res) => {
   //const newUser = new User();
   let params = req.params;
   console.log(params);
-  let retCode = mongoAccess.playerSet(params.roomid, 5, 'playser666');//joinRoom(params.roomid, params.userid);
+  let retCode = mongoAccess.arrayChange(params.roomid,'player', 0, 'playser000');//joinRoom(params.roomid, params.userid);
   if (retCode == 0) {
     res.json({ message: params.roomid + " join success!!" });
   } else {

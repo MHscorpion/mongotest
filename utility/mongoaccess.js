@@ -46,17 +46,21 @@ module.exports = class MongoAccess {
     return retValue;
   }
 
-  playerSet(roomid, nindex, setValue) {
+  arrayChange(roomid, keyName, nindex, setValue) {
     let retCode = 0;
-    console.log(nindex);
+    let updateStr = {};
+    let arrayStr = {};
 
     if (nindex == -1) {
       // 지정 배열 전체 값  변경 
+      let indexStr=keyName+".$[]";
+      arrayStr[indexStr]=setValue;
+      updateStr.$set = arrayStr;
+
       RoomInfo.updateOne(
         { room_id: roomid },
-        { $set: { "player.$[]": setValue } },
+        updateStr,//{ $set: { "player.$[]": setValue } },
         { upsert: true }
-
       ).then((resData) => {
         console.log('player all data change success');
         console.log(resData);
@@ -64,21 +68,14 @@ module.exports = class MongoAccess {
       }
       )
     } else {
-      console.log('change nindex data');
-
-      let updateStr = {};
-      if (nindex == 0) updateStr = { $set: { 'player.0': setValue } };
-      if (nindex == 1) updateStr = { $set: { 'player.1': setValue } };
-      if (nindex == 2) updateStr = { $set: { 'player.2': setValue } };
-      if (nindex == 3) updateStr = { $set: { 'player.3': setValue } };
-      if (nindex == 4) updateStr = { $set: { 'player.4': setValue } };
-      if (nindex == 5) updateStr = { $set: { 'player.5': setValue } };
-      if (nindex == 6) updateStr = { $set: { 'player.6': setValue } };
+      let indexStr=keyName+'.'+nindex;
+      arrayStr[indexStr]=setValue;
+      updateStr.$set = arrayStr;
+      
       // 지정 어레이 인덱스의 요소값 변경
       RoomInfo.updateOne(
         { room_id: roomid },
         updateStr
-
       ).then((resData) => {
         console.log('player element change success');
         console.log(resData);
