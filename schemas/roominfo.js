@@ -26,7 +26,6 @@ const RoomInfoSchema = new Schema({
   player: {
     type: [String],
     default: ["NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE"],
-    index: true,
   },
   bettingOrder: {
     type: [Number],

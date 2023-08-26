@@ -20,13 +20,9 @@ const UserSchema = new Schema({
     type: String,
     default: "10000000"
   },
-  joinedRoom: {
-    type: String,
-    default: "notjoin",
-  },
-  myBettingAmt: {
-    type: Number,
-    default: 0,
+  loginedUser: {
+    type: Boolean,
+    default: false,
   },
   modDate: {
     type: Date,

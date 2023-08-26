@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const http = require("http");
 const bodyParser = require("body-parser");
@@ -5,15 +6,9 @@ const Players = require('./schemas/users.js');
 const RoomInfo = require('./schemas/roominfo.js');
 const Dealercard = require('./schemas/dealercard.js');
 const mongoHandler = require('./utility/mongoaccess.js');
-
 const mongoAccess = new mongoHandler();
 
-const mongoose = require('mongoose');
-const { parseArgs } = require('util');
 const server = express();
-
-const handleOpen = () => console.log("connected to DB!");
-const handleError = (error) => console.log("DB Error", error);
 
 server.get('/', (req, res) => {
   /*
@@ -115,6 +110,20 @@ server.get('/adduser/:name/:passwd/:nick', (req, res) => {
 
 })
 
+server.get('/login/:userid/:passwd', (req, res) => {
+
+  let params = req.params;
+  console.log(params);
+
+  let retCode = mongoAccess.loginUser(params.userid, params.passwd);
+  if (retCode == 0) {
+    res.json({ message: params.userid + " login success!!" });
+  } else {
+    res.json({ message: params.userid + " login fail!! :" + retCode.toString });
+  }
+
+})
+
 server.get('/delall', (req, res) => {
   //const newUser = new User();
 
@@ -198,7 +207,7 @@ server.get('/joinroom/:roomid/:userid', (req, res) => {
   //const newUser = new User();
   let params = req.params;
   console.log(params);
-  let retCode = mongoAccess.arrayChange(params.roomid,'player', 0, 'playser000');//joinRoom(params.roomid, params.userid);
+  let retCode = mongoAccess.roomArrayUpdate(params.roomid, 'playerStatus', 0, 0);//joinRoom(params.roomid, params.userid);
   if (retCode == 0) {
     res.json({ message: params.roomid + " join success!!" });
   } else {
@@ -206,6 +215,46 @@ server.get('/joinroom/:roomid/:userid', (req, res) => {
   }
 
 })
+
+server.get('/setdata/:roomid/:name/:value', (req, res) => {
+  //const newUser = new User();
+  let params = req.params;
+  console.log(params);
+  let retCode = mongoAccess.roomDataUpdate(params.roomid, params.name, params.value);//joinRoom(params.roomid, params.userid);
+  if (retCode == 0) {
+    res.json({ message: params.name + " data update uccess!!" });
+  } else {
+    res.json({ message: params.name + " data update fail!! :" + retCode.toString });
+  }
+
+})
+
+server.get('/datapush/:roomid/:name/:value', (req, res) => {
+  //const newUser = new User();
+  let params = req.params;
+  console.log(params);
+  let retCode = mongoAccess.roomArrayPush(params.roomid, params.name, params.value);//joinRoom(params.roomid, params.userid);
+  if (retCode == 0) {
+    res.json({ message: params.name + " data push uccess!!" });
+  } else {
+    res.json({ message: params.name + " data push fail!! :" + retCode.toString });
+  }
+
+})
+
+server.get('/dataempty/:roomid/:name', (req, res) => {
+  //const newUser = new User();
+  let params = req.params;
+  console.log(params);
+  let retCode = mongoAccess.roomArrayReset(params.roomid, params.name);//joinRoom(params.roomid, params.userid);
+  if (retCode == 0) {
+    res.json({ message: params.name + " array empty uccess!!" });
+  } else {
+    res.json({ message: params.name + " array empty fail!! :" + retCode.toString });
+  }
+
+})
+
 
 server.get('/addroom/:room_id', (req, res) => {
   /*
@@ -230,15 +279,7 @@ server.listen(3000, (err) => {
   if (err) {
     return console.log(err);
   } else {
-    mongoose.connect("mongodb+srv://androlimo2osys:Must980419@mongocluster.sm5hzzb.mongodb.net/?retryWrites=true&w=majority", {
-      dbName: 'mydb', // 실제로 데이터 저장할 db명
-
-    });
-
-    //createPokerArray();
-    const db = mongoose.connection; //mongoose로 연결한 첫번째 연결을 의미합니다. 자세한건 후술
-    db.on("error", handleError);
-    db.once("open", handleOpen);
+    mongoAccess.connect();
   }
 })
 
