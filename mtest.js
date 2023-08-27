@@ -34,7 +34,7 @@ server.get('/', (req, res) => {
         })
       });
       */
-  res.json({ message: 'not suppotr....' });
+  res.json({ message: 'who are you?' });
 
 })
 
@@ -115,13 +115,13 @@ server.get('/login/:userid/:passwd', (req, res) => {
   let params = req.params;
   console.log(params);
 
-  let retCode = mongoAccess.loginUser(params.userid, params.passwd);
-  if (retCode == 0) {
-    res.json({ message: params.userid + " login success!!" });
-  } else {
-    res.json({ message: params.userid + " login fail!! :" + retCode.toString });
-  }
-
+  mongoAccess.loginUser(params.userid, params.passwd).then((retCode) => {
+    if (retCode == 0) {
+      res.json({ message: params.userid + " login success!!" });
+    } else {
+      res.json({ message: params.userid + " login fail!! :" + retCode });
+    }
+  });
 })
 
 server.get('/delall', (req, res) => {
@@ -207,11 +207,25 @@ server.get('/joinroom/:roomid/:userid', (req, res) => {
   //const newUser = new User();
   let params = req.params;
   console.log(params);
-  let retCode = mongoAccess.roomArrayUpdate(params.roomid, 'playerStatus', 0, 0);//joinRoom(params.roomid, params.userid);
+  mongoAccess.joinRoom(params.roomid, params.userid).then((retCode) => {
+    if (retCode == 0) {
+      res.json({ message: params.roomid + " join success!!" });
+    } else {
+      res.json({ message: params.roomid + " join fail!! room full :" + retCode });
+    }
+  });
+
+})
+
+server.get('/setarray/:roomid/:name/:index/:value', (req, res) => {
+  //const newUser = new User();
+  let params = req.params;
+  console.log(params);
+  let retCode = mongoAccess.roomArrayUpdate(params.roomid, params.name, param.index, params.value);//joinRoom(params.roomid, params.userid);
   if (retCode == 0) {
-    res.json({ message: params.roomid + " join success!!" });
+    res.json({ message: params.name + " array data update uccess!!" });
   } else {
-    res.json({ message: params.roomid + " join fail!! :" + retCode.toString });
+    res.json({ message: params.name + " array data update fail!! :" + retCode.toString });
   }
 
 })
@@ -229,11 +243,11 @@ server.get('/setdata/:roomid/:name/:value', (req, res) => {
 
 })
 
-server.get('/datapush/:roomid/:name/:value', (req, res) => {
+server.get('/cardpush/:roomid/:name/:value', (req, res) => {
   //const newUser = new User();
   let params = req.params;
   console.log(params);
-  let retCode = mongoAccess.roomArrayPush(params.roomid, params.name, params.value);//joinRoom(params.roomid, params.userid);
+  let retCode = mongoAccess.roomCardPush(params.roomid, params.name, params.value);//joinRoom(params.roomid, params.userid);
   if (retCode == 0) {
     res.json({ message: params.name + " data push uccess!!" });
   } else {
@@ -242,16 +256,30 @@ server.get('/datapush/:roomid/:name/:value', (req, res) => {
 
 })
 
-server.get('/dataempty/:roomid/:name', (req, res) => {
+server.get('/cardreset/:roomid/:name', (req, res) => {
   //const newUser = new User();
   let params = req.params;
   console.log(params);
-  let retCode = mongoAccess.roomArrayReset(params.roomid, params.name);//joinRoom(params.roomid, params.userid);
+  let retCode = mongoAccess.roomCardReset(params.roomid, params.name);//joinRoom(params.roomid, params.userid);
   if (retCode == 0) {
     res.json({ message: params.name + " array empty uccess!!" });
   } else {
     res.json({ message: params.name + " array empty fail!! :" + retCode.toString });
   }
+
+})
+
+server.get('/cardpop/:roomid', (req, res) => {
+  let params = req.params;
+  console.log(params);
+  mongoAccess.deckCardPop(params.roomid).then((retCode) => {
+    if (retCode == 0) {
+      res.json({ message: params.roomid + " cardpop success!!:" + mongoAccess.getPopCard() });
+    } else {
+      res.json({ message: params.roomid + " cardpop fail!! :" + retCode.toString });
+    }
+  }
+  );
 
 })
 
@@ -265,12 +293,32 @@ server.get('/addroom/:room_id', (req, res) => {
     */
   let params = req.params;
   console.log(params);
-  let retCode = mongoAccess.createRoom(params.room_id);
-  if (retCode === 0) {
-    res.json({ message: params.room_id + " create success!!" });
-  } else {
-    res.json({ message: params.room_id + " create fail!! :" + retCode.toString });
-  }
+  let retCode = mongoAccess.createRoom(params.room_id).then((retCode) => {
+    if (retCode === 0) {
+      res.json({ message: params.room_id + " create room success!!" });
+    } else {
+      res.json({ message: params.room_id + " create room fail!! :" + retCode.toString });
+    }
+  });
+
+})
+
+server.get('/delroom/:room_id', (req, res) => {
+  /*
+    let userId = req.params('name');
+    let userPasswd = req.params('passwd');
+    let nickName = req.params('nick');
+    let haveChip = req.params('chips');
+    */
+  let params = req.params;
+  console.log(params);
+  let retCode = mongoAccess.deleteRoom(params.room_id).then((retCode) => {
+    if (retCode === 0) {
+      res.json({ message: params.room_id + " delete room success!!" });
+    } else {
+      res.json({ message: params.room_id + " delete room fail!! :" + retCode.toString });
+    }
+  });
 
 })
 
@@ -279,7 +327,7 @@ server.listen(3000, (err) => {
   if (err) {
     return console.log(err);
   } else {
-    mongoAccess.connect();
+    mongoAccess.mongoConnect();
   }
 })
 

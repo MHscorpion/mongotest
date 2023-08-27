@@ -7,47 +7,73 @@ const mongoose = require('mongoose');
 module.exports = class MongoAccess {
 
   constructor() {
-
+    this.popCard = '00';
   }
-  connect() {
-    dbconn();
+  mongoConnect() {
+    dbconn().then((resCode) => {
+      if (resCode == 0) {
+        console.log('mongo db connect ok.');
+      }
+    });
   }
 
-  createRoom(roomid) {
+  async createRoom(roomid) {
     let roomInfo = new RoomInfo();
     roomInfo.room_id = roomid;
 
+    let retCode = 0;
+    try {
+      const resData = await RoomInfo.insertOne(roomInfo);
+      if (resData) {
+        console.log(`create room data: ${roomid}`);
+      } else {
+        retCode = 4;
+      }
+
+      let newCardDeck = new Dealercard();
+      newCardDeck.room_id = roomid;
+      newCardDeck.cards = createPokerArray();
+
+      const resData2 = await Dealercard.insertOne(newCardDeck);
+      if (resData2) {
+        console.log(`create dealercard: ${roomid}`);
+      } else {
+        retCode = 4;
+      }
+    } catch (err) {
+      retCode = 99;
+      console.log('room create err:' + err);
+    }
+
+    return retCode;
+  }
+
+  async deleteRoom(roomid) {
+
     let retValue = 0;
-    RoomInfo.insertMany(roomInfo)
-      .then((resData) => {
-        console.log('Room create success...');
-      }).catch((err) => {
+    try {
+      const resData = await RoomInfo.findOneAndDelete({ 'room_id': roomid });
+      if (resData) {
+        console.log(`delete room data: ${roomid}`);
+      } else {
+        retCode = 4;
+      }
 
-        //console.log('Room add error');
-        console.log('room create error');
-        retValue = 1;
-      })
+      const resData2 = await Dealercard.findOneAndDelete({ 'room_id': roomid });
+      if (resData2) {
+        console.log(`delete dealerCard data: ${roomid}`);
+      } else {
+        retCode = 4;
+      }
+    } catch (err) {
+      console.log('delete room err:' + err);
+      retCode = 99;
+    }
 
-    let newCardDeck = new Dealercard();
-    newCardDeck.room_id = roomid;
-    newCardDeck.cards = createPokerArray();
-
-    Dealercard.insertMany(newCardDeck)
-      .then((cards) => {
-        //console.log(cards);
-        //res.json({ message: 'deckcard create success...' })
-        console.log('deckcard create success...');
-
-      }).catch((err) => {
-
-        //console.log('dd eckcaradd error');
-        console.log('deckcaradd error');
-        retValue = 2;
-      })
     return retValue;
   }
 
-  roomDataUpdate(roomid, keyName, setValue) {
+  async roomDataUpdate(roomid, keyName, setValue) {
     let retCode = 0;
     let updateStr = {};
 
@@ -58,36 +84,37 @@ module.exports = class MongoAccess {
     console.log(updateStr);
 
     // 지정 어레이 인덱스의 요소값 변경
-    RoomInfo.findOneAndUpdate(
-      { room_id: roomid },
-      updateStr,
-      {
-        upsert: true,
-        returnOriginal: false,
+    try {
+      const resData = await RoomInfo.findOneAndUpdate(
+        { room_id: roomid },
+        updateStr,
+        {
+          upsert: true,
+          returnOriginal: false,
+        }
+      );
+      if (resData) {
+        console.log('room data update success');
+        console.log(resData);
+      } else {
+        retCode = 4;
       }
-    ).then((resData) => {
-      console.log('room data update success');
-      console.log(resData);
+    } catch (err) {
+      retCode = 99;
+      console.log('roomDataUpdate err:' + err);
 
-      retCode = 0;
     }
-    ).catch((err) => {
-      console.log(err);
-      retCode = 1;
-    })
-
     return retCode;
-
   }
   /**
-   * 
+   * room array member element update
    * @param {string} roomid 룸아이디
    * @param {string} keyName 룸객체내의 변수 이름
    * @param {number} nindex  
    * @param {any} setValue 설정값
    * @returns 
    */
-  roomArrayUpdate(roomid, keyName, nindex, setValue) {
+  async roomArrayUpdate(roomid, keyName, nindex, setValue) {
     let retCode = 0;
     let updateStr = {};
     let arrayStr = {};
@@ -97,51 +124,64 @@ module.exports = class MongoAccess {
       let indexStr = keyName + ".$[]";
       arrayStr[indexStr] = setValue;
       updateStr.$set = arrayStr;
-
-      RoomInfo.findOneAndUpdate(
-        { room_id: roomid },
-        updateStr,
-        {
-          upsert: true,
-          returnOriginal: false,
+      try {
+        const resData = await RoomInfo.findOneAndUpdate(
+          { room_id: roomid },
+          updateStr,
+          {
+            upsert: true,
+            returnOriginal: false,
+          }
+        );
+        if (resData) {
+          console.log('array all data change success');
+          console.log(resData);
+        } else {
+          retCode = 4;
         }
-      ).then((resData) => {
-        console.log('player all data change success');
-        console.log(resData);
-        retCode = 0;
-      }
-      ).catch((err) => {
+      } catch (err) {
+        retCode = 99;
         console.log(err);
-        retCode = 1;
-      })
+
+      }
+
     } else {
       let indexStr = keyName + '.' + nindex;
       arrayStr[indexStr] = setValue;
       updateStr.$set = arrayStr;
 
       // 지정 어레이 인덱스의 요소값 변경
-      RoomInfo.findOneAndUpdate(
-        { room_id: roomid },
-        updateStr,
-        {
-          upsert: true,
-          returnOriginal: false,
+      try {
+        const resData = await RoomInfo.findOneAndUpdate(
+          { room_id: roomid },
+          updateStr,
+          {
+            upsert: true,
+            returnOriginal: false,
+          }
+        );
+        if (resData) {
+          console.log('array element data change success');
+          console.log(resData);
+        } else {
+          retCode = 4;
         }
-      ).then((resData) => {
-        console.log('player element change success');
-        console.log(resData);
-
-        retCode = 0;
-      }
-      ).catch((err) => {
+      } catch (err) {
+        retCode = 99;
         console.log(err);
-        retCode = 1;
-      })
+
+      }
     }
     return retCode;
   }
-
-  roomArrayPush(roomid, keyName, setValue) {
+  /**
+   * deck card push
+   * @param {*} roomid 
+   * @param {*} keyName 
+   * @param {*} setValue 
+   * @returns 
+   */
+  async roomCardPush(roomid, keyName, setValue) {
     let retCode = 0;
     let updateStr = {};
     let arrayStr = {};
@@ -149,28 +189,31 @@ module.exports = class MongoAccess {
     arrayStr[keyName] = setValue;
     updateStr.$push = arrayStr;
     // 지정 어레이 인덱스의 요소값 변경
-    RoomInfo.findOneAndUpdate(
-      { room_id: roomid },
-      updateStr,
-      {
-        upsert: true,
-        returnOriginal: false,
+    try {
+      const resData = await RoomInfo.findOneAndUpdate(
+        { room_id: roomid },
+        updateStr,
+        {
+          upsert: true,
+          returnOriginal: false,
+        }
+      );
+      if (resData) {
+        console.log('deckcard pushsuccess');
+        console.log(resData);
+      } else {
+        retCode = 4;
       }
-    ).then((resData) => {
-      console.log('array push success');
-      console.log(resData);
-
-      retCode = 0;
-    }
-    ).catch((err) => {
+    } catch (err) {
+      retCode = 99;
       console.log(err);
-      retCode = 1;
-    })
+
+    }
 
     return retCode;
   }
 
-  roomArrayReset(roomid, keyName) {
+  async roomCardReset(roomid, keyName) {
     let retCode = 0;
     let updateStr = {};
     let arrayStr = {};
@@ -178,68 +221,99 @@ module.exports = class MongoAccess {
     arrayStr[keyName] = [];
     updateStr.$set = arrayStr;
     // 지정 어레이 인덱스의 요소값 변경
-    RoomInfo.findOneAndUpdate(
-      { room_id: roomid },
-      updateStr,
-      {
-        upsert: true,
-        returnOriginal: false,
+    try {
+      const resData = await RoomInfo.findOneAndUpdate(
+        { room_id: roomid },
+        updateStr,
+        {
+          upsert: true,
+          returnOriginal: false,
+        }
+      );
+      if (resData) {
+        console.log('deckcard reset success');
+        console.log(resData);
+      } else {
+        retCode = 4;
       }
-    ).then((resData) => {
-      console.log('array push success');
-      console.log(resData);
-
-      retCode = 0;
-    }
-    ).catch((err) => {
+    } catch (err) {
+      retCode = 99;
       console.log(err);
-      retCode = 1;
-    })
 
+    }
     return retCode;
   }
 
-  joinRoom(roomid, playerid) {
+  getPopCard() {
+    return this.popCard;
+  }
+
+  async deckCardPop(roomid) {
+    let retCode = 0;
+    try {
+      const resData = await Dealercard.findOne(
+        { room_id: roomid },
+      );
+      if (resData) {
+        this.popCard = resData.cards[resData.popIndex];
+        resData.popIndex++;
+        await resData.save();
+        console.log(resData);
+      } else {
+        retCode = 4;
+      }
+    } catch (err) {
+      retCode = 99;
+      console.log(err);
+    }
+    return retCode;
+  }
+
+  async joinRoom(roomid, playerid) {
     let retCode = 0;
     // NONE 인 첫번째 어레이 데이터에 유저 등록
+    try {
+      const resData = await RoomInfo.findOneAndUpdate(
+        { room_id: roomid, player: "NONE" },
+        { $set: { "player.$": playerid } },
+        {
+          upsert: true,
+          returnOriginal: false,
+        });
+      if (resData) {
+        console.log(resData);
+      } else {
+        retCode = 4;
+      }
+    } catch (err) {
+      console.log(err);
+      retCode = 99;
+    }
+    return retCode;
+  }
 
-    RoomInfo.updateOne({ room_id: roomid, player: "NONE" }, { $set: { "player.$": playerid } })
-      .then((resData) => {
+  async exitRoom(roomid, playerid) {
+    let retCode = 0;
+    // NONE 인 첫번째 어레이 데이터에 유저 등록
+    try {
+      const resData = await RoomInfo.findOneAndUpdate(
+        { room_id: roomid, player: playerid },
+        { $set: { "player.$": "NONE" } },
+        {
+          upsert: true,
+          returnOriginal: false,
+        }
+      );
+      if (resData) {
         console.log(resData);
 
-        retCode = 1;
-
-      }).catch((err) => {
-        console.log(err);
-        retCode = 0;
-      })
-
-
-    /*
-    Players.find({ user_id: playerid }) // user id exist ?
-      .then((user) => {
-        console.log("find user:" + user[0].user_id)
-        //console.log(user);
-        //res.json({ message: 'find user:' + user[0].user_id })
-        RoomInfo.findOneAndUpdate(
-          { room_id: roomid },
-          { $push: { players: playerid, playersResponse: 0 } },
-        ).then((resData) => {
-          console.log('join room success');
-          retCode = 0;
-        }
-
-        ).catch((err) => {
-
-          console.log('find room error ')
-          retCode = 1;
-        })
-
-      }).catch((err) => {
-        console.log('joinroom error ')
-
-        retCode = 2;
-      })*/
+      } else {
+        retCode = 4;
+      }
+    } catch (err) {
+      console.log(err);
+      retCode = 99;
+    }
     return retCode;
   }
   /**
@@ -247,26 +321,66 @@ module.exports = class MongoAccess {
    * @param {*} userid 
    * @param {*} passwd 
    */
-  loginUser(userid, passwd) {
+  async loginUser(userid, passwd) {
     let retCode = 0;
-
-    Players.find({ user_id: userid }) // user id exist ?
-      .then((user) => {
-        console.log("find user:" + user[0].user_id)
+    try {
+      const user = await Players.findOne({ user_id: userid });
+      // user id exist ?
+      if (user) {
+        console.log("find user:" + user.user_id)
         //console.log(user);
         //res.json({ message: 'find user:' + user[0].user_id })
-        if (user[0].loginedUser == false) {
-          if (user[0].user_id == userid && user[0].password != passwd) {
+        if (user.loginedUser == false) {
+          if (user.user_id == userid && user.password != passwd) {
             retCode = 1; // 비밀번호 틀림.
+            console.log('password fail....')
+          } else {
+            user.loginedUser = true;
+            await user.save();
           }
         } else {
-          retCode = 2; // 아이디 사용중
+          retCode = 3;// 아이디 사용중
+          console.log('playing(logined) id .....');
         }
-      }).catch((err) => {
-        console.log('login fail....')
+      } else {
+        retCode = 4; // not find id
+      }
+    } catch (err) {
+      // not found user id
+      retCode = 99;
+      console.log(err);
+    }
 
-        retCode = 3; // 아이디 없음
-      })
+    return retCode;
+  }
+  async loginOutUser(userid, passwd) {
+    let retCode = 0;
+    try {
+      const user = await Players.findOne({ user_id: userid });
+      // user id exist ?
+      if (user) {
+        console.log("logout user:" + user.user_id)
+        //console.log(user);
+        //res.json({ message: 'find user:' + user[0].user_id })
+        if (user.user_id == userid && user.password == passwd) {
+          if (user.loginedUser == true) {
+            user.loginedUser = false;
+            await user.save();
+          } else {
+            retCode = 2; // 미사용 아이디
+            console.log(`not playing(logined) : ${user.user_id}`);
+          }
+        }
+      } else {
+        retCode = 4;// not find id
+      }
+    } catch (err) {
+      // not found user id
+      retCode = 99;
+      console.log(err);
+    }
+
+    return retCode;
   }
 
 } // class mongoaccess
@@ -311,3 +425,45 @@ function shuffle(array) {
     array[randomPosition] = temporary;
   }
 }
+
+/*
+*
+*  async/await promise example 
+*
+let last_max_code = -1;
+function sqlPromise(sqlStr) {
+  return new Promise((resolve,reject) => {
+    maria.query(sqlStr, function(err, rows, fields) {
+      if(!err) {
+        last_max_code = rows[0].max_code+1;
+        resolve(last_max_code);
+        //console.log(rows[0].max_code+1);
+      } else {
+        reject(-1);
+        console.log("getMax_dtcode err : " + err);
+      }
+    });
+  });
+}
+
+async function getMaxCodeFromDB() {
+  await sqlPromise('SELECT MAX(DT_CODE) AS max_code FROM FT_GR_DT_INFO');
+  return last_max_code;
+}
+
+router.post('/api/post/dt_infoadd', function(req, res) {
+  let insert_dt_code=300004;
+  console.log(req.body) ;
+  console.log(`body Data: ${ req.body.dt_name }`) ;
+  
+  getMaxCodeFromDB().then(
+    tempMax => {
+      console.log(`wait finished  tempMax : ${tempMax}`);
+      insert_dt_code = tempMax;
+      
+      res.status(200).json({
+        "dt_code" : insert_dt_code
+      });       
+    }
+  );
+*/
