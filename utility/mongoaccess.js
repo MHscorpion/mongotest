@@ -23,7 +23,7 @@ module.exports = class MongoAccess {
 
     let retCode = 0;
     try {
-      const resData = await RoomInfo.insertOne(roomInfo);
+      const resData = await RoomInfo.create(roomInfo);
       if (resData) {
         console.log(`create room data: ${roomid}`);
       } else {
@@ -34,7 +34,7 @@ module.exports = class MongoAccess {
       newCardDeck.room_id = roomid;
       newCardDeck.cards = createPokerArray();
 
-      const resData2 = await Dealercard.insertOne(newCardDeck);
+      const resData2 = await Dealercard.create(newCardDeck);
       if (resData2) {
         console.log(`create dealercard: ${roomid}`);
       } else {
