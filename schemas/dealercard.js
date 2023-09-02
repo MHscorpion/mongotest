@@ -8,7 +8,7 @@ const DealerCard = new Schema({
     type: String,
   },
   popIndex: {
-    type: [Number],
+    type: Number,
     default:0,
   },
   cards: {

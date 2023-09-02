@@ -19,6 +19,10 @@ const RoomInfoSchema = new Schema({
     type: Number,
     default: 0,
   },
+  bettingPlayerIndex: {
+    type: Number,
+    default: 0,
+  },
   requestResponse: {
     type: Boolean,
     default: false,
