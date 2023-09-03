@@ -16,13 +16,21 @@ const UserSchema = new Schema({
     type: String,
     unique: true,
   },
-  chips: {
+  money: {
     type: String,
     default: "10000000"
   },
   loginedUser: {
     type: Boolean,
     default: false,
+  },
+  joinedUser: {
+    type: Boolean,
+    default: false,
+  },
+  joinedRoom: {
+    type: String,
+    default: "NONE",
   },
   modDate: {
     type: Date,

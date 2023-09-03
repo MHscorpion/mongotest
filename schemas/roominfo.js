@@ -23,6 +23,14 @@ const RoomInfoSchema = new Schema({
     type: Number,
     default: 0,
   },
+  prevBettingMoney: {
+    type: Number,
+    default: 0,
+  },
+  deckTotalMoney: {
+    type: Number,
+    default: 0,
+  },
   requestResponse: {
     type: Boolean,
     default: false,
